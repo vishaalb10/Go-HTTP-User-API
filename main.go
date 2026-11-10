@@ -23,22 +23,21 @@ func main() {
 	mux.HandleFunc("/", hellohandler)
 
 	mux.HandleFunc("POST /users", createUser)
-
 	mux.HandleFunc("GET /users/{id}", getUser)
-
 	mux.HandleFunc("DELETE /users/{id}", deleteUser)
 
-	fmt.Println("Listening on port :8080 ")
+	fmt.Println("Listening on port :8080")
 	if err := http.ListenAndServe(":8080", mux); err != nil {
-
-		fmt.Println("err occured :", err.Error())
+		fmt.Println("err occurred:", err.Error())
 	}
 }
 
+// Handles requests to the home page.
 func hellohandler(w http.ResponseWriter, _ *http.Request) {
 	fmt.Fprint(w, "i hope i get a good job 😣😣 ")
 }
 
+// Creates and stores a new user.
 func createUser(w http.ResponseWriter, r *http.Request) {
 	var user User
 	err := json.NewDecoder(r.Body).Decode(&user)
@@ -60,8 +59,8 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+// Retrieves a user using their ID.
 func getUser(w http.ResponseWriter, r *http.Request) {
-
 	id, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -71,12 +70,14 @@ func getUser(w http.ResponseWriter, r *http.Request) {
 	cm.RLock()
 	user, ok := userCache[id]
 	cm.RUnlock()
+
 	if !ok {
 		http.Error(w, "My Nigga User Not Found", http.StatusNotFound)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+
 	j, err := json.Marshal(user)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -84,11 +85,10 @@ func getUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-
 	w.Write(j)
-
 }
 
+// Deletes a user using their ID.
 func deleteUser(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil {
